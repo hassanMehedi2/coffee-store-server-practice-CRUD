@@ -77,6 +77,13 @@ async function run() {
         res.send(result)
     })
 
+    // user related api 
+
+    app.get('/user',async(req,res)=>{
+      const cursor = usersCollection.find();
+      const users = await cursor.toArray()
+      res.send(users);
+    })
 
     app.post('/user', async(req,res)=>{
       const user = req.body;
