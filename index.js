@@ -1,12 +1,19 @@
 const express = require('express');
-const cors = require('cors'); 
-const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
+const cors = require('cors');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
-const app= express();
+const app = express();
 const port = process.env.PORT || 5000
 
 // middleware
-app.use(cors());
+
+const corsOptions ={
+  origin:'*', 
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200,
+}
+
+app.use(cors(corsOptions))
 app.use(express.json());
 
 
@@ -28,84 +35,84 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const coffeeCollection = client.db('coffeeDB').collection("coffee");
-    const usersCollection =client.db('coffeeDB').collection("users")
+    const usersCollection = client.db('coffeeDB').collection("users")
 
-    app.get('/coffee',async (req,res)=>{
-        const cursor = coffeeCollection.find();
-        const result = await cursor.toArray();
-        res.send(result);
+    app.get('/coffee', async (req, res) => {
+      const cursor = coffeeCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
     })
-    app.get('/coffee/:id',async(req,res)=>{
-        const id = req.params;
-        const query = {_id: new ObjectId(id)};
-        const result = await coffeeCollection.findOne(query);
-        res.send(result)
-        
+    app.get('/coffee/:id', async (req, res) => {
+      const id = req.params;
+      const query = { _id: new ObjectId(id) };
+      const result = await coffeeCollection.findOne(query);
+      res.send(result)
+
     })
 
-    app.put('/coffee/:id', async (req,res)=>{
-        const id = req.params.id;
-        const updatedCoffee = req.body;
-        const filter = {_id: new ObjectId(id)};
-        const options = {upsert:true};
-        const coffee = {
-            $set:{
-                coffeeName :updatedCoffee.coffeeName ,
-                 quantity :updatedCoffee.quantity ,
-                 supplier :updatedCoffee.supplier ,
-                 taste :updatedCoffee.taste ,
-                 category :updatedCoffee.category ,
-                 details :updatedCoffee.details ,
-                 photo : updatedCoffee.photo
-            }
+    app.put('/coffee/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedCoffee = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+      const coffee = {
+        $set: {
+          coffeeName: updatedCoffee.coffeeName,
+          quantity: updatedCoffee.quantity,
+          supplier: updatedCoffee.supplier,
+          taste: updatedCoffee.taste,
+          category: updatedCoffee.category,
+          details: updatedCoffee.details,
+          photo: updatedCoffee.photo
         }
-        const result = await coffeeCollection.updateOne(filter,coffee,options);
-        res.send(result)
+      }
+      const result = await coffeeCollection.updateOne(filter, coffee, options);
+      res.send(result)
 
     })
 
-    app.post('/coffee',async(req,res)=>{
-        const newCoffee = req.body;
-        const result = await coffeeCollection.insertOne(newCoffee)
-        res.send(result)
+    app.post('/coffee', async (req, res) => {
+      const newCoffee = req.body;
+      const result = await coffeeCollection.insertOne(newCoffee)
+      res.send(result)
     })
 
-    app.delete('/coffee/:id',async(req,res)=>{
-        const id = req.params;
-        const query = {_id : new ObjectId (id)}
-        const result = await coffeeCollection.deleteOne(query)
-        res.send(result)
+    app.delete('/coffee/:id', async (req, res) => {
+      const id = req.params;
+      const query = { _id: new ObjectId(id) }
+      const result = await coffeeCollection.deleteOne(query)
+      res.send(result)
     })
 
     // user related api 
 
-    app.get('/user',async(req,res)=>{
+    app.get('/user', async (req, res) => {
       const cursor = usersCollection.find();
       const users = await cursor.toArray()
       res.send(users);
     })
 
-    app.post('/user', async(req,res)=>{
+    app.post('/user', async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user)
       res.send(result);
     })
 
-    app.delete(`/user/:id`,async (req,res)=>{
+    app.delete(`/user/:id`, async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
       res.send(result);
     })
-    app.patch('/user',async(req,res)=>{
+    app.patch('/user', async (req, res) => {
       const user = req.body;
-      const query = {email: user.email}
+      const query = { email: user.email }
       const updatedUser = {
-        $set :{
-          lastLoggedAt : user.lastLoggedAt
+        $set: {
+          lastLoggedAt: user.lastLoggedAt
         }
       }
-      const result = await usersCollection.updateOne(query,updatedUser);
+      const result = await usersCollection.updateOne(query, updatedUser);
       res.send(result);
     })
 
@@ -120,10 +127,10 @@ async function run() {
 run().catch(console.dir);
 
 
-app.get('/',(req,res)=>{
-    res.send("coffee shop server is running")
+app.get('/', (req, res) => {
+  res.send("coffee shop server is running")
 })
 
-app.listen(port,()=>{
-    console.log('app is running on ',port);
+app.listen(port, () => {
+  console.log('app is running on ', port);
 })
