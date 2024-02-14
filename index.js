@@ -5,7 +5,6 @@ require('dotenv').config()
 const app= express();
 const port = process.env.PORT || 5000
 
-
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -28,7 +27,8 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    const coffeeCollection = client.db('coffeeDB').collection("coffee")
+    const coffeeCollection = client.db('coffeeDB').collection("coffee");
+    const usersCollection =client.db('coffeeDB').collection("users")
 
     app.get('/coffee',async (req,res)=>{
         const cursor = coffeeCollection.find();
@@ -77,6 +77,12 @@ async function run() {
         res.send(result)
     })
 
+
+    app.post('/user', async(req,res)=>{
+      const user = req.body;
+      const result = await usersCollection.insertOne(user)
+      res.send(result);
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
